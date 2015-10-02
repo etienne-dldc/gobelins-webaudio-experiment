@@ -19,7 +19,8 @@ var runSequence = require('run-sequence');
  */
 var src = {
   path 	  : 'app',
-  styles 	: ['app/styles/**/*.scss'],
+  styles 	: ['app/styles/app.scss'],
+  stylesWatch 	: ['app/styles/**/*.scss'],
   scripts : 'app/scripts/**/*.js',
   vendors	: 'app/vendors/**/*.js',
   vendorsBase : 'app/vendors/',
@@ -43,7 +44,7 @@ gulp.task('server', function() {
       server: dist.path
   });
 
-  gulp.watch(src.styles, ['styles']);
+  gulp.watch(src.stylesWatch, ['styles']);
   gulp.watch(src.scripts, ['scripts']).on('change', browserSync.reload);
   gulp.watch(src.vendors, ['vendors']).on('change', browserSync.reload);
   gulp.watch(src.assets, ['assets']).on('change', browserSync.reload);
