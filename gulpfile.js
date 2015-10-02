@@ -11,6 +11,8 @@ var filter = require('gulp-filter');
 var del = require('del');
 var concat = require('gulp-concat');
 var sourcemaps = require('gulp-sourcemaps');
+var runSequence = require('run-sequence');
+
 
 /*
  * Config
@@ -19,21 +21,22 @@ var src = {
   path 	  : 'app',
   styles 	: ['app/styles/**/*.scss'],
   scripts : 'app/scripts/**/*.js',
-  vendor	: 'app/vendor',
+  vendors	: 'app/vendors/**/*.js',
   assets  : 'app/assets/**/*'
 };
 var dist = {
   path    : 'public',
   styles 	: 'public/styles',
   scripts : 'public/scripts',
-  vendor	: 'public/scripts',
+  vendors	: 'public/scripts',
   assets  : 'public'
 };
+
 
 /*
  * Server
  */
-gulp.task('server', ['styles', 'scripts', 'assets'], function() {
+gulp.task('server', function() {
 
   browserSync.init({
       server: dist.path
@@ -41,16 +44,15 @@ gulp.task('server', ['styles', 'scripts', 'assets'], function() {
 
   gulp.watch(src.style, ['styles']);
   gulp.watch(src.scripts, ['scripts']).on('change', browserSync.reload);
+  gulp.watch(src.vendors, ['vendors']).on('change', browserSync.reload);
   gulp.watch(src.assets, ['assets']).on('change', browserSync.reload);
 });
 
 /*
  * Clean 'dist' folder
  */
-gulp.task('clean', function() {
-  setTimeout(function() {
-    return del([dist.path]);
-  }, 100);
+gulp.task('clean', function(cb) {
+  return del([dist.path]);
 });
 
 /*
@@ -96,4 +98,8 @@ gulp.task('styles', function () {
     .pipe(browserSync.stream());
 });
 
-gulp.task('default', ['clean', 'server']);
+gulp.task('default', function () {
+  runSequence('clean',
+              ['assets', 'styles', 'scripts', 'vendors'],
+              'server');
+});
