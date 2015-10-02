@@ -21,11 +21,11 @@ var src = {
   assets  : 'app/assets/**/*'
 };
 var dist = {
-  path    : 'app/public',
-  styles 	: 'app/public/styles',
-  scripts : 'app/public/scripts',
-  vendor	: 'app/public/vendor',
-  assets  : 'app/public'
+  path    : 'public',
+  styles 	: 'public/styles',
+  scripts : 'public/scripts',
+  vendor	: 'public/vendor',
+  assets  : 'public'
 };
 
 /*
@@ -34,7 +34,7 @@ var dist = {
 gulp.task('server', ['clean', 'styles', 'scripts', 'assets'], function() {
 
   browserSync.init({
-      server: "./app/public"
+      server: dist.path
   });
 
   gulp.watch(src.style, ['styles']);
@@ -47,7 +47,7 @@ gulp.task('server', ['clean', 'styles', 'scripts', 'assets'], function() {
  */
 gulp.task('clean', function() {
 	gulp.src(dist.path, {read: false})
-    .pipe(clean());
+    .pipe( clean() );
 });
 
 /*
