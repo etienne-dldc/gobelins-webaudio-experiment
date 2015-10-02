@@ -96,4 +96,125 @@ var sketch = function( p ) {
 
 };
 
-var myp5 = new p5(sketch);
+var sketchBis = function( p ) {
+
+  var song, fft, mic, analyzer;
+  var maxSpectre = false;
+  var spectrumTimeData = [];
+  var groupData = [];
+  var hue = 0;
+
+  p.preload = function() {
+    song = p.loadSound('music/hello.mp3');
+  }
+
+  p.setup = function() {
+    p.createCanvas(window.innerWidth, window.innerHeight);
+    p.background(95, 143, 164);
+    song.loop();
+
+    fft = new p5.FFT();
+    fft.setInput(song);
+
+    analyzer = new p5.Amplitude();
+    analyzer.setInput(song);
+
+  }
+
+  function movingAverage(data, size) {
+    var result = [];
+    for (var i = 0; i<data.length; i += size) {
+      var start = i;
+      var end = start + size;
+      var sum = 0;
+      for (var j = start; j < end; j++) {
+        sum += data[j];
+      }
+      result.push(sum/size);
+    }
+    return result;
+  }
+
+  function timeAverage(data) {
+    var nbOfTimeElem = data.length;
+    var nbOfPoint = data[0].length;
+    var result = [];
+    for (var i = 0; i < nbOfPoint; i++) {
+      var sum = 0;
+      for (var j = 0; j < nbOfTimeElem; j++) {
+        sum += data[j][i];
+      }
+      result.push(sum/nbOfTimeElem);
+    }
+    return result;
+  }
+
+  function displayGroup(data) {
+
+    var blockWidth = p.width/(data.length-1);
+
+    var vol = analyzer.getLevel();
+    p.colorMode(p.HSB, 100);
+    hue += 0.1;
+    hue = hue % 255;
+    var c = p.color(hue, 50, 20 + 60-(60*vol) );
+    p.background(c);
+
+    for (var i = 0; i < data.length; i++) {
+      // var average = 0;
+      // for (var j = 0; j < groupData.length; j++) {
+      //   average += groupData[j][i];
+      // }
+      // average = average/groupData.length;
+      //
+      // var diff = p.abs(average - data[i]) * 2;
+      // diff = diff > 255 ? 255 : diff;
+
+      var arr = [];
+      for (var j = 0; j < groupData.length; j++) {
+        arr.push(groupData[j][i]);
+      }
+      var max = p.max(arr);
+
+      // Display block
+      var left = blockWidth*i;
+      var height = p.map(data[i], 0, 255, 0, p.height);
+      p.colorMode(p.RGB, 255);
+      p.noStroke();
+
+      var c = p.color(255, 255, 255, p.map(data[i], 0, max, 0, 255) );
+      p.fill(c);
+      p.rect(left, p.height - height, blockWidth, height );
+
+      c = p.color(255, 255, 255, 50);
+      p.fill(c);
+      p.rect(left, 0, blockWidth, p.height - p.map(max, 0, 255, 0, p.height) );
+
+      c = p.color(255, 255, 255, 255);
+      p.fill(c);
+      p.rect(left, p.height - p.map(max, 0, 255, 0, p.height) - 5, blockWidth, 4 );
+    }
+  }
+
+  p.draw = function() {
+
+    var spectrum = fft.analyze();
+    if (maxSpectre !== false) {
+      spectrum = spectrum.slice(0, maxSpectre);
+    }
+    var spectrumAverage = movingAverage(spectrum, 20);
+    spectrumTimeData.push(spectrumAverage);
+    if (spectrumTimeData.length == 10) {
+      var spectrumAverageTime = timeAverage(spectrumTimeData);
+      groupData.push(spectrumAverageTime);
+      if (groupData.length > 40) {
+        groupData.shift();
+      }
+      displayGroup(spectrumAverageTime);
+      spectrumTimeData.shift();
+    }
+  }
+
+};
+
+var myp5 = new p5(sketchBis);
