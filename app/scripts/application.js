@@ -99,7 +99,7 @@ var sketch = function( p ) {
 var sketchBis = function( p ) {
 
   var song, fft, mic, analyzer;
-  var maxSpectre = false;
+  var maxSpectre = 800;
   var spectrumTimeData = [];
   var groupData = [];
   var hue = 0;
@@ -192,13 +192,21 @@ var sketchBis = function( p ) {
 
       c = p.color(255, 255, 255, 255);
       p.fill(c);
-      p.rect(left, p.height - p.map(max, 0, 255, 0, p.height) - 5, blockWidth, 4 );
+      p.rect(left, p.height - p.map(max, 0, 255, 0, p.height) - 5, blockWidth, 5 );
     }
   }
 
   p.draw = function() {
 
-    var spectrum = fft.analyze();
+    if ( song.isPlaying() ) { // .isPlaying() returns a boolean
+      var spectrum = fft.analyze();
+    } else {
+      var spectrum = [];
+      for (var i = 0; i < maxSpectre; i++) {
+        spectrum[i] = 0;
+      }
+    }
+
     if (maxSpectre !== false) {
       spectrum = spectrum.slice(0, maxSpectre);
     }
@@ -214,6 +222,15 @@ var sketchBis = function( p ) {
       spectrumTimeData.shift();
     }
   }
+
+  p.mousePressed = function() {
+    if ( song.isPlaying() ) { // .isPlaying() returns a boolean
+      song.pause();
+    } else {
+      song.play();
+    }
+  }
+
 
 };
 
