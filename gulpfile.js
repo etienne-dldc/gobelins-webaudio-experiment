@@ -22,6 +22,7 @@ var src = {
   styles 	: ['app/styles/**/*.scss'],
   scripts : 'app/scripts/**/*.js',
   vendors	: 'app/vendors/**/*.js',
+  vendorsBase : 'app/vendors/',
   assets  : 'app/assets/**/*'
 };
 var dist = {
@@ -42,7 +43,7 @@ gulp.task('server', function() {
       server: dist.path
   });
 
-  gulp.watch(src.style, ['styles']);
+  gulp.watch(src.styles, ['styles']);
   gulp.watch(src.scripts, ['scripts']).on('change', browserSync.reload);
   gulp.watch(src.vendors, ['vendors']).on('change', browserSync.reload);
   gulp.watch(src.assets, ['assets']).on('change', browserSync.reload);
@@ -77,7 +78,10 @@ gulp.task("scripts", function () {
  * Vendors
  */
 gulp.task("vendors", function () {
-  return gulp.src( src.vendors )
+  return gulp.src([
+    src.vendorsBase + 'p5.min.js',
+    src.vendors
+  ])
     .pipe( concat('vendors.js') )
     .pipe( gulp.dest(dist.vendors) );
 });
